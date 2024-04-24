@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: "datskadevops"
-  tag: "v1.0.3-3cd44ec"
+  tag: "v1.0.5-bc554d2"
   arch: "amd64"
   os: "linux"
 

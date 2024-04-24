@@ -21,7 +21,7 @@ A = \007#         BEEP
 
 APP=$(shell basename $(shell git remote get-url origin) | cut -d"." -f1)
 ## $(shell basename $(shell git remote get-url origin))
-REGESTRY := datskadevops
+REGISTRY := datskadevops
 VERSION=$(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD)
 TARGETARCH := amd64 
 TARGETOS=${detected_OS}
@@ -45,28 +45,28 @@ build: format get
 linux: format get
 	@printf "$GTarget OS/ARCH: $Rlinux/$(detected_arch)$D\n"
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(detected_arch) go build -v -o bot -ldflags "-X="github.com/annadatska/bot/cmd.appVersion=${VERSION}
-	docker build --build-arg name=linux -t ${REGESTRY}/${APP}:${VERSION}-linux-$(detected_arch) .
+	docker build --build-arg name=linux -t ${REGISTRY}/${APP}:${VERSION}-linux-$(detected_arch) .
 
 windows: format get
 	@printf "$GTarget OS/ARCH: $Rwindows/$(detected_arch)$D\n"
 	CGO_ENABLED=0 GOOS=windows GOARCH=$(detected_arch) go build -v -o bot -ldflags "-X="github.com/annadatska/bot/cmd.appVersion=${VERSION}
-	docker build --build-arg name=windows -t ${REGESTRY}/${APP}:${VERSION}-windows-$(detected_arch) .
+	docker build --build-arg name=windows -t ${REGISTRY}/${APP}:${VERSION}-windows-$(detected_arch) .
 
 darwin:format get
 	@printf "$GTarget OS/ARCH: $Rdarwin/$(detected_arch)$D\n"
 	CGO_ENABLED=0 GOOS=darwin GOARCH=$(detected_arch) go build -v -o bot -ldflags "-X="github.com/annadatska/bot/cmd.appVersion=${VERSION}
-	docker build --build-arg name=darwin -t ${REGESTRY}/${APP}:${VERSION}-darwin-$(detected_arch) .
+	docker build --build-arg name=darwin -t ${REGISTRY}/${APP}:${VERSION}-darwin-$(detected_arch) .
 
 arm: format get
 	@printf "$GTarget OS/ARCH: $R$(detected_OS)/arm$D\n"
 	CGO_ENABLED=0 GOOS=$(detected_OS) GOARCH=arm go build -v -o bot -ldflags "-X="github.com/annadatska/bot/cmd.appVersion=${VERSION}
-	docker build --build-arg name=arm -t ${REGESTRY}/${APP}:${VERSION}-$(detected_OS)-arm .
+	docker build --build-arg name=arm -t ${REGISTRY}/${APP}:${VERSION}-$(detected_OS)-arm .
 
 image:
-	docker build . -t ${REGESTRY}/${APP}:${VERSION}-${detected_OS}-${TARGETARCH} --build-arg TARGETOS=${detected_OS} --build-arg TARGETARCH=${TARGETARCH}
+	docker build . -t ${REGISTRY}/${APP}:${VERSION}-${detected_OS}-${TARGETARCH} --build-arg TARGETOS=${detected_OS} --build-arg TARGETARCH=${TARGETARCH}
 
 push:
-	docker push ${REGESTRY}/${APP}:${VERSION}-${TARGETOS}-${TARGETARCH}
+	docker push ${REGISTRY}/${APP}:${VERSION}-${TARGETOS}-${TARGETARCH}
 
 dive: image
 	IMG1=$$(docker images -q | head -n 1); \

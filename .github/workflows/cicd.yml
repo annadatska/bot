@@ -17,12 +17,12 @@ jobs:
       - name: Docker Hub login
         uses: docker/login-action@v3
         with:
-          username: ${{ var.DOCKERHUB_USERNAME }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build&Push
         env:
           APP: "bot"
-          REGISTRY: ${{ var.DOCKERHUB_USERNAME }}
+          REGISTRY: ${{ vars.DOCKERHUB_USERNAME }}
         run: make image push
 
   cd:

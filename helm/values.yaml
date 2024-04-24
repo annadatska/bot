@@ -1,0 +1,14 @@
+replicaCount: 1
+
+image:
+  repository: "datskadevops"
+  tag: "v1.0.3-3cd44ec"
+  arch: "amd64"
+  os: "linux"
+
+secret:
+  name: "bot"
+  env: "TELE_TOKEN"
+  key: "token"
+securityContext:
+  privileged: true

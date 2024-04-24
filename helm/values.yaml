@@ -1,11 +1,9 @@
 replicaCount: 1
-
 image:
   repository: "datskadevops"
-  tag: "v1.0.5-bc554d2"
+  tag: "v1.0.5-bcd1235"
   arch: "amd64"
   os: "linux"
-
 secret:
   name: "bot"
   env: "TELE_TOKEN"

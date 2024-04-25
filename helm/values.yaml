@@ -1,6 +1,7 @@
 replicaCount: 1
 image:
-  repository: "datskadevops"
+  registry: "ghcr.io"
+  repository: "annadatska/bot"
   tag: "v1.0.5-bcd1235"
   arch: "amd64"
   os: "linux"

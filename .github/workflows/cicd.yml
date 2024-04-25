@@ -8,11 +8,17 @@ on:
 env:
   TARGETOS: linux
   TARGETARCH: amd64
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   ci:
     name: CI
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout
@@ -26,13 +32,14 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.REGISTERY_TOKEN }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build&Push
         env:
           APP: "bot"
+          REGISTRY: "${{ env.REGISTRY }}/${{ github.actor }}"
         run: make image push
 
   cd:

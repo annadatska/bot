@@ -6,8 +6,8 @@ on:
       - develop
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  TARGETOS: linux
+  TARGETARCH: amd64
 
 jobs:
   ci:
@@ -23,17 +23,16 @@ jobs:
       - name: Run test
         run: make test
 
-      - name: Docker Hub login
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.REGISTERY_TOKEN }}
 
       - name: Build&Push
         env:
           APP: "bot"
-          REGISTRY: "${{ env.REGISTRY }}/${{ github.actor }}"
         run: make image push
 
   cd:

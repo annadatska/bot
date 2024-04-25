@@ -1,12 +1,13 @@
 name: BOT-CICD
 
-on: push
-      branches:
-        - develop
+on:
+  push
+    branches:
+      - develop
 
 env:
-    REGISTRY: ghcr.io
-    IMAGE_NAME: ${{ github.repository }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   ci:

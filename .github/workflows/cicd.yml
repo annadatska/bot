@@ -21,6 +21,12 @@ jobs:
       packages: write
 
     steps:
+
+      - name: Debug Credentials
+        run: |
+          echo "Username: ${{ github.actor }}"
+          echo "Token: ${{ secrets.GHCR_TOKEN }}"
+
       - name: Checkout
         uses: actions/checkout@v3
         with:

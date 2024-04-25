@@ -22,11 +22,6 @@ jobs:
 
     steps:
 
-      - name: Debug Credentials
-        run: |
-          echo "Username: ${{ github.actor }}"
-          echo "Token: ${{ secrets.PASSWORD }}"
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -40,7 +35,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.PASSWORD }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build&Push
         env:

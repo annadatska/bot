@@ -21,7 +21,7 @@ A = \007#         BEEP
 
 APP=$(shell basename $(shell git remote get-url origin) | cut -d"." -f1)
 ## $(shell basename $(shell git remote get-url origin))
-REGISTRY := datskadevops
+REGISTRY := ghcr.io/annadatska
 VERSION=$(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD)
 TARGETARCH := amd64 
 TARGETOS=${detected_OS}

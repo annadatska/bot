@@ -1,6 +1,12 @@
 name: BOT-CICD
 
 on: push
+      branches:
+        - develop
+
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   ci:
@@ -12,17 +18,21 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Run test
         run: make test
+
       - name: Docker Hub login
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.REGISTERY_TOKEN }}
+
       - name: Build&Push
         env:
           APP: "bot"
-          REGISTRY: ${{ vars.DOCKERHUB_USERNAME }}
+          REGISTRY: "${{ env.REGISTRY }}/${{ github.actor }}"
         run: make image push
 
   cd:

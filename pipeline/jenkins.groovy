@@ -1,7 +1,7 @@
 pipeline {
     agent any
     parameters {
-        choice(name: 'OS', choices: ['linux', 'apple', 'windows'], description: 'Pick OS')
+        choice(name: 'OS', choices: ['linux', 'windows'], description: 'Pick OS')
         choice(name: 'ARCH', choices: ['amd64', 'arm64'], description: 'Pick ARCH')
     }
 
@@ -55,7 +55,9 @@ pipeline {
     }
     post {
         always {
-            sh 'docker logout'
+            node {
+                sh 'docker logout'
+            }
         }
     }
 }

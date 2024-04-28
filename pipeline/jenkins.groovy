@@ -1,62 +1,104 @@
 pipeline {
-    agent any
+    agent { label 'codespace' }
     parameters {
-        choice(name: 'OS', choices: ['linux', 'windows'], description: 'Pick OS')
-        choice(name: 'ARCH', choices: ['amd64', 'arm64'], description: 'Pick ARCH')
+        choice(name: 'OS', choices: ['linux', 'darwin', 'windows', 'all'], description: 'Choose OS for container-image building')
+        choice(name: 'TARGETARCH', choices: ['amd64', 'arm64'], description: 'Pick architecture')
     }
-
     environment {
-        GITHUB_TOKEN=credentials('annadatska')
-        REPO = 'https://github.com/annadatska/bot.git'
-        BRANCH = 'main'
+        GIT_REPO = 'https://github.com/annadatska/bot'
+        BRANCH = 'develop'
+        REGISTRY = 'datskadevops'
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
     }
-
     stages {
-
         stage('clone') {
             steps {
-                echo 'Clone Repository'
-                git branch: "${BRANCH}", url: "${REPO}"
+                echo 'Clone repo'
+                git branch: "${BRANCH}", url: "${GIT_REPO}"
             }
         }
-
+        stage('Login to Docker Repository') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR')]) {
+                    withEnv(["DOCKERHUB_PASSWORD=${env.DOCKERHUB_CREDENTIALS_PSW}", "DOCKERHUB_USERNAME=${env.DOCKERHUB_CREDENTIALS_USR}"]) {
+                        sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                    }
+                }
+            }
+        }
         stage('test') {
             steps {
-                echo 'Testing started'
-                sh "make test"
+                echo 'run tests from Makefile'
+                sh 'make test'
             }
         }
-
         stage('build') {
-            steps {
-                echo "Building binary for platform ${params.OS} on ${params.ARCH} started"
-                sh "make ${params.OS} ${params.ARCH}"
+            parallel {
+                stage('Build for Linux platform') {
+                    when { expression { params.OS == 'linux' || params.OS == 'all' } }
+                    steps {
+                        echo 'Building for Linux platform'
+                        sh 'make image TARGETOS=linux TARGETARCH=${TARGETARCH}'
+                    }
+                }
+                stage('Build Darwin for Darwin platform') {
+                    when { expression { params.OS == 'darwin' || params.OS == 'all' } }
+                    steps {
+                        echo 'Building for Darwin platform'
+                        sh 'make image TARGETOS=macos'
+                    }
+                }
+                stage('Build for Windows platform') {
+                    when { expression { params.OS == 'windows'  || params.OS == 'all' } }
+                    steps {
+                        echo 'Building for Windows'
+                        sh 'make image TARGETOS=windows'
+                    }
+                }
             }
         }
-
-        stage('image') {
-            steps {
-                echo "Building image for platform ${params.OS} on ${params.ARCH} started"
-                sh "make image-${params.OS} ${params.ARCH}"
+        stage('push') {
+            parallel {
+                stage('Push Linux architecture to repository') {
+                    when { expression { params.OS == 'linux' || params.OS == 'all' } }
+                    steps {
+                        sh 'make push TARGETOS=linux'
+                    }
+                }
+                stage('Push Darwin architecture to repository') {
+                    when { expression { params.OS == 'darwin' || params.OS == 'all' } }
+                    steps {
+                        sh 'make push TARGETOS=macos'
+                    }
+                }
+                stage('Push Windows architecture to repository') {
+                    when { expression { params.OS == 'windows' || params.OS == 'all' } }
+                    steps {
+                        sh 'make push TARGETOS=windows'
+                    }
+                }
             }
         }
-        
-        stage('login to GHCR') {
-            steps {
-                sh "echo $GITHUB_TOKEN_PSW | docker login ghcr.io -u $GITHUB_TOKEN_USR --password-stdin"
-            }
-        }
-
-        stage('push image') {
-            steps {
-                sh "make -n ${params.OS} ${params.ARCH} image push"
-            }
-        } 
-    }
-    post {
-        always {
-            node {
-                sh 'docker logout'
+        stage('clean') {
+            parallel {
+                stage('Clean Linux image') {
+                    when { expression { params.OS == 'linux' || params.OS == 'all' } }
+                    steps {
+                        sh 'make clean TARGETOS=linux'
+                    }
+                }
+                stage('Clean Darwin image') {
+                    when { expression { params.OS == 'darwin' || params.OS == 'all' } }
+                    steps {
+                        sh 'make clean TARGETOS=macos'
+                    }
+                }
+                stage('Clean Windows image') {
+                    when { expression { params.OS == 'windows' || params.OS == 'all' } }
+                    steps {
+                        sh 'make clean TARGETOS=windows'
+                    }
+                }
             }
         }
     }

@@ -22,48 +22,17 @@ pipeline {
                 sh 'make test'
             }
         }
-        stage('build'){
-            steps{
-                script{
-                    echo "Start build application"
-                    if (params.OS == "linux" && params.ARCH == "amd64"){
-                        sh 'make linux'
-                    }
-                    else if (params.OS == "linux" && params.ARCH == "arm64"){
-                        sh 'make linux_arm'
-                    }
-                    else if (params.OS == "windows" && params.ARCH == "amd64"){
-                        sh 'make windows'
-                    }
-                    else if (params.OS == "windows" && params.ARCH == "arm64"){
-                        echo "Sorry, ARM arch not supported for windows"
-                    }
-                    else if (params.OS == "macos"){
-                        echo "Sorry, MacOS not supported"
-                    }
-                }
+        stage('build') {
+            steps {
+                echo "Building binary for platform ${params.OS} on ${params.ARCH} started"
+                sh "make ${params.OS} ${params.ARCH}"
             }
         }
-        stage('image'){
-            steps{
-                script{
-                    echo "Start build docker image"
-                    if (params.OS == "linux" && params.ARCH == "amd64"){
-                        sh 'make image_linux'
-                    }
-                    else if (params.OS == "linux" && params.ARCH == "arm64"){
-                        sh 'make image_linux_arm'
-                    }
-                    else if (params.OS == "windows" && params.ARCH == "amd64"){
-                        sh 'make image_windows'
-                    }
-                    else if (params.OS == "windows" && params.ARCH == "arm64"){
-                        echo "Sorry, ARM arch not supported for windows"
-                    }
-                    else if (params.OS == "macos"){
-                        echo "Sorry, MacOS not supported"
-                    }
-                }
+
+        stage('image') {
+            steps {
+                echo "Building image for platform ${params.OS} on ${params.ARCH} started"
+                sh "make image-${params.OS} ${params.ARCH}"
             }
         }
         stage('login to GHCR') {

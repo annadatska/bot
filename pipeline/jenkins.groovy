@@ -3,7 +3,7 @@ pipeline {
     environment{
         REPO = 'https://github.com/annadatska/bot'
         BRANCH = 'develop'
-        DOCKER='datskadevops'
+        GITHUB_TOKEN=creadentials('annadatska')
     }
     parameters {
         choice(name: 'OS', choices: ['linux', 'darwin', 'windows', 'all'], description: 'Pick OS')
@@ -48,20 +48,15 @@ pipeline {
                 }
             }
         }
-        stage('push'){
-            steps{
-                script{
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub'){
-                        sh 'make push'
-                    }
-                }
+        stage('login to GHCR') {
+            steps {
+                sh "echo $GITHUB_TOKEN_PSW | docker login ghcr.io -u $GITHUB_TOKEN_USR --password-stdin"
             }
         }
+        stage('push image') {
+            steps {
+                sh "make push"
+            }
+        } 
     }
-
-    post {
-		always {
-			sh 'docker logout'
-		}
-	}
 }

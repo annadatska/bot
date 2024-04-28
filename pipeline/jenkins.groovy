@@ -17,6 +17,15 @@ pipeline {
                 git branch: "${BRANCH}", url: "${REPO}"
             }
         }
+        stage('Login to Docker Repository') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
+                    withEnv(["DOCKERHUB_PASSWORD=${env.PASSWORD}", "DOCKERHUB_USERNAME=${env.DOCKERHUB_USERNAME}"]) {
+                        sh 'docker login -u $DOCKERHUB_USERNAME -p $PASSWORD'
+                    }
+                }
+            }
+        }
         stage('test'){
             steps{
                 echo "Test Build"

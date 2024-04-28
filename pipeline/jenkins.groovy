@@ -29,7 +29,7 @@ pipeline {
                     when { expression { params.OS == 'linux' || params.OS == 'all' } }
                     steps {
                         echo 'Building for Linux platform'
-                        sh 'make image TARGETOS=linux TARGETARCH=${params.ARCH}'
+                        sh "make image TARGETOS=linux TARGETARCH=${params.ARCH}"
                     }
                 }
                 stage('Build Darwin for Darwin platform') {

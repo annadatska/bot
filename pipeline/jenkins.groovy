@@ -4,7 +4,6 @@ pipeline {
         REPO = 'https://github.com/annadatska/bot'
         BRANCH = 'develop'
         DOCKER='datskadevops'
-        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
     }
     parameters {
         choice(name: 'OS', choices: ['linux', 'darwin', 'windows', 'all'], description: 'Pick OS')
@@ -50,11 +49,13 @@ pipeline {
             }
         }
         stage('push'){
-            script{
+            steps{
+                script{
                     docker.withRegistry('https://index.docker.io/v1/', 'dockerhub'){
                         sh 'make push'
                     }
                 }
+            }
         }
     }
 

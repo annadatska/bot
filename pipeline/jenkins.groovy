@@ -22,10 +22,26 @@ pipeline {
                 sh 'make test'
             }
         }
-        stage('build') {
-            steps {
-                echo "Building binary for platform ${params.OS} on ${params.ARCH} started"
-                sh "make ${params.OS} ${params.ARCH}"
+        stage('build'){
+            steps{
+                script{
+                    echo "Start build application"
+                    if (params.OS == "linux" && params.ARCH == "amd64"){
+                        sh 'make linux'
+                    }
+                    else if (params.OS == "linux" && params.ARCH == "arm64"){
+                        sh 'make linux arm'
+                    }
+                    else if (params.OS == "windows" && params.ARCH == "amd64"){
+                        sh 'make windows'
+                    }
+                    else if (params.OS == "windows" && params.ARCH == "arm64"){
+                        echo "Sorry, ARM is not supported for windows"
+                    }
+                    else if (params.OS == "darwin"){
+                        echo "Sorry, OS is not supported"
+                    }
+                }
             }
         }
 

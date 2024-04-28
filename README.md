@@ -1,2 +1,2 @@
-# kbot
+# bot
 devops app from scratch

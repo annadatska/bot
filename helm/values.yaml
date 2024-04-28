@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   registry: "ghcr.io"
   repository: "annadatska/bot"
-  tag: "v1.0.5-2f9d571"
+  tag: "v1.0.5-fbcea17"
   arch: "amd64"
   os: "linux"
 secret:

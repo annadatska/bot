@@ -50,15 +50,20 @@ pipeline {
             }
         }
         stage('Login') {
-
 			steps {
-				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-			}
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR')]) {
+                    withEnv(["DOCKERHUB_PASSWORD=${env.DOCKERHUB_CREDENTIALS_PSW}", "DOCKERHUB_USERNAME=${env.DOCKERHUB_CREDENTIALS_USR}"]) {
+                        sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                    }
+                }
+            }
 		}
         stage('push'){
-            steps{
-                    sh 'make push'
-            }
+            script{
+                    docker.withRegistry('', 'dockerhub'){
+                        sh 'make push'
+                    }
+                }
         }
     }
 

@@ -4,6 +4,7 @@ pipeline {
         REPO = 'https://github.com/annadatska/bot'
         BRANCH = 'develop'
         DOCKER='datskadevops'
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
     }
     parameters {
         choice(name: 'OS', choices: ['linux', 'darwin', 'windows', 'all'], description: 'Pick OS')
@@ -48,14 +49,22 @@ pipeline {
                 }
             }
         }
+        stage('Login') {
+
+			steps {
+				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+			}
+		}
         stage('push'){
             steps{
-                script{
-                    docker.withRegistry('', 'dockerhub'){
-                        sh 'make push'
-                    }
-                }
+                    sh 'make push'
             }
         }
     }
+
+    post {
+		always {
+			sh 'docker logout'
+		}
+	}
 }

@@ -1,102 +1,77 @@
 pipeline {
-    agent { label 'codespace' }
-    parameters {
-        choice(name: 'OS', choices: ['linux', 'darwin', 'windows', 'all'], description: 'Choose OS for container-image building')
-        choice(name: 'TARGETARCH', choices: ['amd64', 'arm64'], description: 'Pick architecture')
-    }
-    environment {
-        GIT_REPO = 'https://github.com/annadatska/bot'
+    agent any
+    environment{
+        REPO = 'https://github.com/annadatska/bot'
         BRANCH = 'develop'
-        REGISTRY = 'datskadevops'
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+        DOCKER='datskadevops'
+    }
+    parameters {
+        choice(name: 'OS', choices: ['linux', 'darwin', 'windows', 'all'], description: 'Pick OS')
+        choice(name: 'ARCH', choices: ['amd64', 'arch64'], description: 'Pick ARCH')
+
     }
     stages {
         stage('clone') {
             steps {
-                echo 'Clone repo'
-                git branch: "${BRANCH}", url: "${GIT_REPO}"
+                echo "Clone repo"
+                git branch: "${BRANCH}", url: "${REPO}"
             }
         }
-        stage('Login to Docker Repository') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR')]) {
-                    withEnv(["DOCKERHUB_PASSWORD=${env.DOCKERHUB_CREDENTIALS_PSW}", "DOCKERHUB_USERNAME=${env.DOCKERHUB_CREDENTIALS_USR}"]) {
-                        sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
-                    }
-                }
-            }
-        }
-        stage('test') {
-            steps {
-                echo 'run tests from Makefile'
+        stage('test'){
+            steps{
+                echo "Test Build"
                 sh 'make test'
             }
         }
-        stage('build') {
-            parallel {
-                stage('Build for Linux platform') {
-                    when { expression { params.OS == 'linux' || params.OS == 'all' } }
-                    steps {
-                        echo 'Building for Linux platform'
-                        sh 'make image TARGETOS=linux TARGETARCH=${TARGETARCH}'
+        stage('build'){
+            steps{
+                script{
+                    echo "Start build application"
+                    if (params.OS == "linux" && params.ARCH == "amd64"){
+                        sh 'make linux'
                     }
-                }
-                stage('Build Darwin for Darwin platform') {
-                    when { expression { params.OS == 'darwin' || params.OS == 'all' } }
-                    steps {
-                        echo 'Building for Darwin platform'
-                        sh 'make image TARGETOS=macos'
+                    else if (params.OS == "linux" && params.ARCH == "arm64"){
+                        sh 'make linux_arm'
                     }
-                }
-                stage('Build for Windows platform') {
-                    when { expression { params.OS == 'windows'  || params.OS == 'all' } }
-                    steps {
-                        echo 'Building for Windows'
-                        sh 'make image TARGETOS=windows'
+                    else if (params.OS == "windows" && params.ARCH == "amd64"){
+                        sh 'make windows'
+                    }
+                    else if (params.OS == "windows" && params.ARCH == "arm64"){
+                        echo "Sorry, ARM arch is not supported for windows"
+                    }
+                    else if (params.OS == "macos"){
+                        echo "Sorry, MacOS is not supported"
                     }
                 }
             }
         }
-        stage('push') {
-            parallel {
-                stage('Push Linux architecture to repository') {
-                    when { expression { params.OS == 'linux' || params.OS == 'all' } }
-                    steps {
-                        sh 'make push TARGETOS=linux'
+        stage('image'){
+            steps{
+                script{
+                    echo "Start build docker image"
+                    if (params.OS == "linux" && params.ARCH == "amd64"){
+                        sh 'make image_linux'
                     }
-                }
-                stage('Push Darwin architecture to repository') {
-                    when { expression { params.OS == 'darwin' || params.OS == 'all' } }
-                    steps {
-                        sh 'make push TARGETOS=macos'
+                    else if (params.OS == "linux" && params.ARCH == "arm64"){
+                        sh 'make image_linux_arm'
                     }
-                }
-                stage('Push Windows architecture to repository') {
-                    when { expression { params.OS == 'windows' || params.OS == 'all' } }
-                    steps {
-                        sh 'make push TARGETOS=windows'
+                    else if (params.OS == "windows" && params.ARCH == "amd64"){
+                        sh 'make image_windows'
+                    }
+                    else if (params.OS == "windows" && params.ARCH == "arm64"){
+                        echo "Sorry, ARM arch is not supported for windows"
+                    }
+                    else if (params.OS == "macos"){
+                        echo "Sorry, MacOS is not supported"
                     }
                 }
             }
         }
-        stage('clean') {
-            parallel {
-                stage('Clean Linux image') {
-                    when { expression { params.OS == 'linux' || params.OS == 'all' } }
-                    steps {
-                        sh 'make clean TARGETOS=linux'
-                    }
-                }
-                stage('Clean Darwin image') {
-                    when { expression { params.OS == 'darwin' || params.OS == 'all' } }
-                    steps {
-                        sh 'make clean TARGETOS=macos'
-                    }
-                }
-                stage('Clean Windows image') {
-                    when { expression { params.OS == 'windows' || params.OS == 'all' } }
-                    steps {
-                        sh 'make clean TARGETOS=windows'
+        stage('push'){
+            steps{
+                script{
+                    docker.withRegistry('', 'dockerhub'){
+                        sh 'make push'
                     }
                 }
             }

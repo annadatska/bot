@@ -48,7 +48,7 @@ pipeline {
         stage('image') {
             steps {
                 echo "Building image for platform ${params.OS} on ${params.ARCH} started"
-                sh "make image-${params.OS} ${params.ARCH}"
+                sh "make image"
             }
         }
         stage('login to GHCR') {

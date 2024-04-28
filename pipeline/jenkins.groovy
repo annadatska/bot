@@ -49,18 +49,9 @@ pipeline {
                 }
             }
         }
-        stage('Login') {
-			steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR')]) {
-                    withEnv(["DOCKERHUB_PASSWORD=${env.DOCKERHUB_CREDENTIALS_PSW}", "DOCKERHUB_USERNAME=${env.DOCKERHUB_CREDENTIALS_USR}"]) {
-                        sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
-                    }
-                }
-            }
-		}
         stage('push'){
             script{
-                    docker.withRegistry('', 'dockerhub'){
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub'){
                         sh 'make push'
                     }
                 }

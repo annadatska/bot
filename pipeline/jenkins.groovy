@@ -3,7 +3,7 @@ pipeline {
     environment{
         REPO = 'https://github.com/annadatska/bot'
         BRANCH = 'develop'
-        GITHUB_TOKEN=creadentials('annadatska')
+        GITHUB_TOKEN=credentials('annadatska')
     }
     parameters {
         choice(name: 'OS', choices: ['linux', 'darwin', 'windows', 'all'], description: 'Pick OS')

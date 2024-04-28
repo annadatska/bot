@@ -14,7 +14,7 @@ test:
 	go test -v
 
 build: format
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -v -o kbot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
+	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -v -o bot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
 
 echo-version:
 	echo ${VERSION}
@@ -32,13 +32,13 @@ get:
 	go get 
 
 linux:
-	GOOS=linux GOARCH=amd64 go build -v -o kbot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
+	GOOS=linux GOARCH=amd64 go build -v -o bot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
 
 arm:
-	GOOS=linux GOARCH=arm64 go build -v -o kbot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
+	GOOS=linux GOARCH=arm64 go build -v -o bot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
 
 macos:
-	GOOS=darwin GOARCH=amd64 go build -v -o kbot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
+	GOOS=darwin GOARCH=amd64 go build -v -o bot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
 
 windows:
-	GOOS=windows GOARCH=amd64 go build -v -o kbot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"
+	GOOS=windows GOARCH=amd64 go build -v -o bot -ldflags "-X=github.com/annadatska/bot/cmd.appVersion=${VERSION}"

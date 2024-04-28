@@ -23,46 +23,27 @@ pipeline {
                 sh 'make test'
             }
         }
-        stage('build'){
-            steps{
-                script{
-                    echo "Start build application"
-                    if (params.OS == "linux" && params.ARCH == "amd64"){
-                        sh 'make linux'
-                    }
-                    else if (params.OS == "linux" && params.ARCH == "arm64"){
-                        sh 'make linux_arm'
-                    }
-                    else if (params.OS == "windows" && params.ARCH == "amd64"){
-                        sh 'make windows'
-                    }
-                    else if (params.OS == "windows" && params.ARCH == "arm64"){
-                        echo "Sorry, ARM arch not supported for windows"
-                    }
-                    else if (params.OS == "macos"){
-                        echo "Sorry, MacOS not supported"
+        stage('build') {
+            parallel {
+                stage('Build for Linux platform') {
+                    when { expression { params.OS == 'linux' || params.OS == 'all' } }
+                    steps {
+                        echo 'Building for Linux platform'
+                        sh 'make image TARGETOS=linux TARGETARCH=${TARGETARCH}'
                     }
                 }
-            }
-        }
-        stage('image'){
-            steps{
-                script{
-                    echo "Start build docker image"
-                    if (params.OS == "linux" && params.ARCH == "amd64"){
-                        sh 'make image_linux'
+                stage('Build Darwin for Darwin platform') {
+                    when { expression { params.OS == 'darwin' || params.OS == 'all' } }
+                    steps {
+                        echo 'Building for Darwin platform'
+                        sh 'make image TARGETOS=macos'
                     }
-                    else if (params.OS == "linux" && params.ARCH == "arm64"){
-                        sh 'make image_linux_arm'
-                    }
-                    else if (params.OS == "windows" && params.ARCH == "amd64"){
-                        sh 'make image_windows'
-                    }
-                    else if (params.OS == "windows" && params.ARCH == "arm64"){
-                        echo "Sorry, ARM arch not supported for windows"
-                    }
-                    else if (params.OS == "macos"){
-                        echo "Sorry, MacOS not supported"
+                }
+                stage('Build for Windows platform') {
+                    when { expression { params.OS == 'windows'  || params.OS == 'all' } }
+                    steps {
+                        echo 'Building for Windows'
+                        sh 'make image TARGETOS=windows'
                     }
                 }
             }
